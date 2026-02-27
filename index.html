@@ -4,82 +4,39 @@
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-black text-white p-8 min-h-screen">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-5xl font-black mb-12 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent text-center drop-shadow-2xl">
-            🎙️ VoiceDollar.ai
-        </h1>
-        
-        <div class="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 mb-8 backdrop-blur-xl">
-            <textarea id="text" class="w-full p-6 bg-transparent border-0 text-2xl font-medium text-white placeholder-gray-400 focus:outline-none resize-none h-32" 
-                      placeholder="Kuch bhi bol... 'Namaste bhai kaisa hai?' ya 'Hello World!'"></textarea>
-            
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                <select id="voice" class="p-4 bg-slate-700 rounded-xl text-lg font-semibold">
-                    <option>🇮🇳 Hindi Female</option>
-                    <option>🇺🇸 English Female</option>
-                    <option>🤖 Robot Voice</option>
-                </select>
-                
-                <button onclick="generate()" class="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 p-4 rounded-2xl font-black text-xl shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105 transition-all">
-                    ⚡ BOLO!
-                </button>
-            </div>
-        </div>
-        
-        <audio id="audio" controls class="w-full rounded-2xl mb-8 hidden shadow-2xl bg-slate-800 p-2"></audio>
-        
-        <div class="text-center space-y-2">
-            <p class="text-emerald-400 font-bold text-lg">✅ FREE FOREVER | ✅ UNLIMITED | ✅ NO SIGNUP</p>
-            <p class="text-gray-400 text-sm">Mobile pe perfect • Instant generation • Hindi+English</p>
-        </div>
+<body class="bg-slate-900 text-white p-8">
+    <div class="max-w-lg mx-auto">
+        <h1 class="text-4xl font-bold mb-8 text-blue-400 text-center">🎤 VoiceDollar.ai</h1>
+        <textarea id="text" class="w-full p-4 bg-slate-800 rounded-lg mb-4" rows="4" placeholder="Namaste bhai kaisa hai?"></textarea>
+        <button onclick="speakNow()" class="w-full bg-blue-600 p-4 rounded-lg font-bold text-lg mb-4">🔊 BOLO!</button>
+        <button onclick="loadVoices()" class="w-full bg-green-600 p-4 rounded-lg font-bold text-sm mb-4">📱 Voices Load Karo</button>
+        <div id="status" class="text-center text-sm mb-4"></div>
     </div>
-    
+
     <script>
-        function generate() {
-            const text = document.getElementById('text').value.trim();
-            if(!text) return alert('Kuch toh bol bhai! 😄');
-            
-            const voiceSelect = document.getElementById('voice').value;
-            const btn = event.target;
-            const originalBtn = btn.innerHTML;
-            
-            btn.innerHTML = '🎵 Sunao raha hun...';
-            btn.disabled = true;
-            
-            // PURE BROWSER TTS - ZERO APIs, ZERO TOKENS!
-            const utterance = new SpeechSynthesisUtterance(text.slice(0, 150));
-            
-            if(voiceSelect === '🇮🇳 Hindi Female') {
-                utterance.lang = 'hi-IN';
-                utterance.voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('hi'));
-            } else if(voiceSelect === '🇺🇸 English Female') {
-                utterance.lang = 'en-US';
-                utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes('Jenny') || v.lang === 'en-US');
-            } else {
-                utterance.pitch = 0.5;
-                utterance.rate = 1.2;
-            }
-            
-            utterance.rate = 0.95;
-            utterance.volume = 1;
-            utterance.onend = () => {
-                btn.innerHTML = originalBtn;
-                btn.disabled = false;
-            };
-            
-            speechSynthesis.cancel();
-            speechSynthesis.speak(utterance);
-            
-            // Audio player bhi banao recording ke liye
-            const audio = document.getElementById('audio');
-            audio.classList.remove('hidden');
+        let voicesLoaded = false;
+        
+        function loadVoices() {
+            const voices = speechSynthesis.getVoices();
+            document.getElementById('status').innerHTML = `✅ ${voices.length} voices loaded!`;
+            voicesLoaded = true;
         }
         
-        // Voices load hone pe
-        speechSynthesis.onvoiceschanged = () => {
-            console.log('Voices ready!');
-        };
-    </script>
-</body>
-</html>
+        function speakNow() {
+            const text = document.getElementById('text').value.trim();
+            if(!text) return alert('Text daal!');
+            
+            document.getElementById('status').innerHTML = '🔊 Bol raha hun...';
+            
+            // Simple Hindi TTS
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'hi-IN';
+            msg.rate = 0.9;
+            msg.pitch = 1;
+            msg.volume = 1;
+            
+            speechSynthesis.cancel();
+            speechSynthesis.speak(msg);
+            
+            msg.onend = () => {
+                document.getElementById('status').i
