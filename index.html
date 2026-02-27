@@ -5,20 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
+        .glass { background: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
+        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; }
+        .btn-gradient { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+    </style>
 </head>
-<body class="bg-slate-900 text-white p-5 flex items-center justify-center min-h-screen">
-    <div class="max-w-md w-full bg-slate-800 p-8 rounded-2xl shadow-2xl">
-        <h1 class="text-3xl font-bold mb-6 text-blue-400 text-center">VoiceDollar.ai</h1>
-        <textarea id="textInput" class="w-full p-4 bg-slate-700 rounded-lg border border-slate-600" rows="4"></textarea>
-        <button onclick="generateVoice()" id="btn" class="w-full bg-blue-600 p-4 mt-6 rounded-lg font-bold">Generate</button>
-        <audio id="audioPlayer" controls class="hidden w-full mt-6"></audio>
+<body class="p-5 flex items-center justify-center min-h-screen">
+    <div class="max-w-xl w-full glass p-10 shadow-2xl">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-blue-500">VoiceDollar<span class="text-white">.ai</span></h1>
+        </div>
+        
+        <textarea id="textInput" class="w-full p-5 input-box rounded-xl focus:outline-none focus:border-blue-500 mb-6" rows="6" placeholder="Enter text..."></textarea>
+            
+        <button onclick="generateVoice()" id="btn" class="w-full btn-gradient p-5 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
+            Generate Voice
+        </button>
+
+        <audio id="audioPlayer" controls class="hidden w-full mt-8 bg-slate-800 rounded-full border border-slate-700"></audio>
     </div>
 
     <script>
         async function generateVoice() {
             const text = document.getElementById('textInput').value;
+            if(!text) return;
+            
             const btn = document.getElementById('btn');
+            const player = document.getElementById('audioPlayer');
+
             btn.disabled = true;
+            btn.innerHTML = "Processing...";
 
             try {
                 const response = await fetch("/api/generate", {
@@ -28,14 +46,14 @@
                 });
 
                 const result = await response.blob();
-                const player = document.getElementById('audioPlayer');
                 player.src = URL.createObjectURL(result);
                 player.classList.remove('hidden');
                 player.play();
             } catch (err) {
-                alert("Error!");
+                console.log("Error");
             } finally {
                 btn.disabled = false;
+                btn.innerHTML = "Generate Voice";
             }
         }
     </script>
