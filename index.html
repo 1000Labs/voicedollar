@@ -15,7 +15,7 @@
 <body class="p-5 flex items-center justify-center min-h-screen">
     <div class="max-w-xl w-full glass p-10 shadow-2xl">
         <div class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-blue-500">VoiceDollar<span class="text-white">.ai</span></h1>
+            <h1 class="text-4xl font-extrabold text-blue-500 text-center tracking-tighter">VoiceDollar<span class="text-white">.ai</span></h1>
         </div>
         
         <textarea id="textInput" class="w-full p-5 input-box rounded-xl focus:outline-none focus:border-blue-500 mb-6" rows="6" placeholder="Enter text..."></textarea>
@@ -44,6 +44,8 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inputs: text }),
                 });
+
+                if(!response.ok) throw new Error();
 
                 const result = await response.blob();
                 player.src = URL.createObjectURL(result);
