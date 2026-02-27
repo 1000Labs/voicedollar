@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/generate",
+      "destination": "https://api-inference.huggingface.co/models/facebook/mms-tts-eng"
+    }
+  ]
+}
