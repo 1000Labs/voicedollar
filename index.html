@@ -8,34 +8,48 @@
 </head>
 <body class="bg-slate-900 text-white p-5">
     <div class="max-w-md mx-auto">
-        <h1 class="text-2xl font-bold mb-4">VoiceDollar.ai</h1>
-        <textarea id="textInput" class="w-full p-3 bg-slate-800 rounded" placeholder="Type here..."></textarea>
-        <button onclick="generateVoice()" class="w-full bg-blue-600 p-3 mt-4 rounded">Generate Voice</button>
-        <audio id="audioPlayer" controls class="hidden w-full mt-4"></audio>
+        <h1 class="text-2xl font-bold mb-4 text-blue-400">🎤 VoiceDollar.ai</h1>
+        <textarea id="textInput" class="w-full p-3 bg-slate-800 rounded resize-none" placeholder="Enter text..." rows="4"></textarea>
+        <button onclick="generateVoice()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 p-3 mt-4 rounded-lg font-bold hover:from-blue-500">🔊 Generate Voice</button>
+        <audio id="audioPlayer" controls class="hidden w-full mt-4 rounded-lg"></audio>
+        <p class="text-xs mt-2 text-gray-400">Max 100 characters</p>
     </div>
 
     <script>
+        const HF_TOKEN = "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";
+        
         async function generateVoice() {
-            const text = document.getElementById('textInput').value;
-            if(!text) return alert("Please enter text!");
+            const text = document.getElementById('textInput').value.trim();
+            if(!text || text.length > 100) return alert("Max 100 chars!");
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Generating...";
+            btn.disabled = true;
             
             try {
-                // TOKEN YAHAN NAHI HAI - GITHUB AB SAFE HAI
                 const response = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", {
                     headers: { 
+                        "Authorization": `Bearer ${HF_TOKEN}`,
                         "Content-Type": "application/json"
                     },
                     method: "POST",
-                    body: JSON.stringify({ inputs: text }),
+                    body: JSON.stringify({ inputs: text })
                 });
 
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
                 const result = await response.blob();
                 const player = document.getElementById('audioPlayer');
                 player.src = URL.createObjectURL(result);
                 player.classList.remove('hidden');
                 player.play();
-            } catch (err) { 
-                alert("Error"); 
+                
+            } catch (err) {
+                alert("Error: Check internet or try again");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
     </script>
