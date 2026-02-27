@@ -1,66 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceDollar.ai - Global AI Voice Cloning</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0f172a; color: white; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-    </style>
-</head>
-<body class="p-5 font-sans">
-    <div class="max-w-md mx-auto space-y-6">
-        <header class="text-center py-6">
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">VoiceDollar.ai</h1>
-            <p class="text-slate-400 text-sm">Professional AI Voice Cloning</p>
-        </header>
+<script>
+    async function generateVoice() {
+        const text = document.getElementById('textInput').value;
+        if(!text) return alert("Please enter text!");
+        document.getElementById('status').classList.remove('hidden');
+        
+        try {
+            // Isme humne token ko poori tarah mita diya hai
+            const response = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", {
+                headers: { 
+                    Authorization: "Bearer " + "REPLACE_WITH_VARIABLE" 
+                },
+                method: "POST",
+                body: JSON.stringify({ inputs: text }),
+            });
 
-        <div class="glass p-6 rounded-2xl space-y-4">
-            <label class="block text-sm font-medium">Step 1: Upload Voice Sample</label>
-            <input type="file" id="audioInput" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600">
-            
-            <label class="block text-sm font-medium pt-2">Step 2: Enter Text</label>
-            <textarea id="textInput" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Type what you want the AI to say..."></textarea>
-            
-            <button onclick="generateVoice()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20">Generate Voice</button>
-        </div>
-        <div id="status" class="hidden text-center text-sm text-blue-400 animate-pulse">Processing your AI Voice...</div>
-        <audio id="audioPlayer" controls class="hidden w-full mt-4"></audio>
-    </div>
+            if (!response.ok) throw new Error("Server Busy");
 
-    <script>
-        // TOKEN YAHAN KHALI HAI - GITHUB AB BLOCK NAHI KAREGA
-        const HF_TOKEN = ""; 
-
-        async function generateVoice() {
-            const text = document.getElementById('textInput').value;
-            if(!text) return alert("Please enter text!");
-            document.getElementById('status').classList.remove('hidden');
-            
-            try {
-                // Ye seedha Vercel ki settings se token uthayega
-                const response = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", {
-                    headers: { Authorization: "Bearer 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" },
-                    method: "POST",
-                    body: JSON.stringify({ inputs: text }),
-                });
-
-                if (!response.ok) throw new Error("Server Busy");
-
-                const result = await response.blob();
-                const audioUrl = URL.createObjectURL(result);
-                const player = document.getElementById('audioPlayer');
-                player.src = audioUrl;
-                player.classList.remove('hidden');
-                player.play();
-            } catch (err) { 
-                alert("Please check Vercel Environment Variables."); 
-            } finally { 
-                document.getElementById('status').classList.add('hidden'); 
-            }
+            const result = await response.blob();
+            const player = document.getElementById('audioPlayer');
+            player.src = URL.createObjectURL(result);
+            player.classList.remove('hidden');
+            player.play();
+        } catch (err) { 
+            alert("Security Blocked. Use Vercel Settings."); 
+        } finally { 
+            document.getElementById('status').classList.add('hidden'); 
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+
