@@ -11,10 +11,9 @@
       "headers": [
         {
           "key": "Authorization",
-          "value": "Bearer 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"
+          "value": "Bearer @HF_TOKEN"
         }
       ]
     }
   ]
 }
-
