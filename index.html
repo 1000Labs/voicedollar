@@ -13,6 +13,7 @@
         .input-box:focus { border-color: #2563eb; }
         .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: 0.2s; }
         .btn-premium:hover { opacity: 0.9; transform: scale(0.99); }
+        .btn-premium:disabled { background: #374151; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
@@ -28,21 +29,34 @@
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
             const player = document.getElementById('player');
+            
             if(!text) return;
-            btn.innerHTML = "Synthesizing..."; btn.disabled = true;
+            
+            btn.innerHTML = "Processing...";
+            btn.disabled = true;
+
             try {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inputs: text }),
                 });
+
                 if (!response.ok) throw new Error();
+
                 const blob = await response.blob();
-                player.src = URL.createObjectURL(blob);
+                const url = URL.createObjectURL(blob);
+                
+                player.src = url;
                 player.classList.remove('hidden');
                 player.play();
-            } catch (err) { }
-            finally { btn.innerHTML = "Generate Voice"; btn.disabled = false; }
+                
+            } catch (err) {
+                // Silently fails as per your command
+            } finally {
+                btn.innerHTML = "Generate Voice";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
