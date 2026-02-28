@@ -6,7 +6,7 @@
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; }
+        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
         .glass-card { background: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
         .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; }
         .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
@@ -14,10 +14,10 @@
 </head>
 <body class="p-5 flex items-center justify-center min-h-screen">
     <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-10">VoiceDollar.ai</h1>
-        <textarea id="textInput" class="w-full p-5 input-box rounded-xl mb-6" rows="5" placeholder="Kuch likho..."></textarea>
-        <button onclick="generateVoice()" id="btn" class="w-full btn-premium p-5 rounded-xl font-bold">Generate Voice</button>
-        <audio id="audioPlayer" controls class="hidden w-full mt-8"></audio>
+        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
+        <textarea id="textInput" class="w-full p-5 input-box rounded-xl focus:outline-none mb-6" rows="6" placeholder="Yahan text likho..."></textarea>
+        <button onclick="generateVoice()" id="btn" class="w-full btn-premium p-5 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">Generate Voice</button>
+        <audio id="audioPlayer" controls class="hidden w-full mt-8 rounded-full border border-slate-700"></audio>
     </div>
     <script>
         async function generateVoice() {
@@ -25,20 +25,25 @@
             if(!text) return;
             const btn = document.getElementById('btn');
             const player = document.getElementById('audioPlayer');
-            btn.innerHTML = "Processing...";
             btn.disabled = true;
+            btn.innerHTML = "Processing...";
             try {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inputs: text }),
                 });
+                if(!response.ok) throw new Error("Server Error");
                 const result = await response.blob();
                 player.src = URL.createObjectURL(result);
                 player.classList.remove('hidden');
                 player.play();
-            } catch (err) { alert("Try again in 10 seconds..."); }
-            finally { btn.innerHTML = "Generate Voice"; btn.disabled = false; }
+            } catch (err) {
+                alert("Model load ho raha hai, 10 second baad dobara try karein.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "Generate Voice";
+            }
         }
     </script>
 </body>
