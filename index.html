@@ -1,92 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceDollar.ai</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #030712; color: #f3f4f6; }
-        .glass-card { background-color: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
-        .input-area { background-color: #1a1f2e; border: 1px solid #374151; color: white; }
-        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceDollar.ai</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { background-color: #030712; color: #f3f4f6; }
+.glass-card { background-color: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
+.input-area { background-color: #1a1f2e; border: 1px solid #374151; color: white; }
+.btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+</style>
 </head>
 <body class="p-5 flex items-center justify-center min-h-screen">
-    <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">
-            VoiceDollar<span class="text-white">.ai</span>
-        </h1>
-        
-        <textarea 
-            id="textInput" 
-            class="w-full p-5 input-area rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6" 
-            rows="6" 
-            placeholder="Enter text here..."
-        ></textarea>
-            
-        <button 
-            type="button"
-            onclick="generateVoice()" 
-            id="btn" 
-            class="w-full btn-primary p-5 rounded-xl font-bold transition-all active:scale-95 shadow-lg"
-        >
-            Generate Voice
-        </button>
+<div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
+<h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">
+VoiceDollar<span class="text-white">.ai</span>
+</h1>
 
-        <audio 
-            id="audioPlayer" 
-            controls 
-            class="hidden w-full mt-8 rounded-full border border-slate-700 bg-slate-800"
-        ></audio>
+<textarea id="textInput"
+class="w-full p-5 input-area rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+rows="6"
+placeholder="Enter text here..."></textarea>
 
-        <p id="errorMsg" class="text-red-500 mt-4 hidden">Something went wrong. Please try again.</p>
-    </div>
+<button type="button" onclick="generateVoice()" id="btn"
+class="w-full btn-primary p-5 rounded-xl font-bold transition-all active:scale-95 shadow-lg">
+Generate Voice
+</button>
 
-    <script>
-        async function generateVoice() {
-            const textArea = document.getElementById('textInput');
-            const text = textArea.value.trim();
-            if (!text) return;
+<audio id="audioPlayer"
+controls
+class="hidden w-full mt-8 rounded-full border border-slate-700 bg-slate-800"></audio>
 
-            const btn = document.getElementById('btn');
-            const player = document.getElementById('audioPlayer');
-            const errorMsg = document.getElementById('errorMsg');
+<p id="errorMsg" class="text-red-500 mt-4 hidden">
+Something went wrong. Check console.
+</p>
+</div>
 
-            // Reset states
-            errorMsg.classList.add('hidden');
-            player.pause();
-            player.src = "";
-            player.classList.add('hidden');
+<script>
+async function generateVoice() {
+const text = document.getElementById('textInput').value.trim();
+if (!text) return;
 
-            btn.disabled = true;
-            btn.innerHTML = "Processing...";
+const btn = document.getElementById('btn');
+const player = document.getElementById('audioPlayer');
+const errorMsg = document.getElementById('errorMsg');
 
-            try {
-                const response = await fetch("/api/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: text }),
-                });
+errorMsg.classList.add('hidden');
+player.classList.add('hidden');
+player.src = "";
 
-                if (!response.ok) {
-                    throw new Error("Server error");
-                }
+btn.disabled = true;
+btn.innerHTML = "Processing...";
 
-                const blob = await response.blob();
-                const audioURL = URL.createObjectURL(blob);
+try {
+const response = await fetch("/api/generate", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ text }),
+});
 
-                player.src = audioURL;
-                player.classList.remove('hidden');
-                await player.play();
+if (!response.ok) {
+throw new Error(await response.text());
+}
 
-            } catch (err) {
-                errorMsg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "Generate Voice";
-            }
-        }
-    </script>
+const blob = await response.blob();
+player.src = URL.createObjectURL(blob);
+player.classList.remove('hidden');
+player.play();
+} catch (err) {
+console.error(err);
+errorMsg.classList.remove('hidden');
+} finally {
+btn.disabled = false;
+btn.innerHTML = "Generate Voice";
+}
+}
+</script>
 </body>
 </html>
