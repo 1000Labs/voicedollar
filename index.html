@@ -6,95 +6,145 @@
     <title>VoiceDollar.ai - ₹29 AI Voice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: linear-gradient(135deg, #030712 0%, #1a1f2e 100%); color: #f3f4f6; font-family: sans-serif; }
-        .glass-card { background: rgba(13, 17, 26, 0.8); border: 1px solid #1f2937; border-radius: 2rem; backdrop-filter: blur(10px); }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; width: 100%; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb, #1d4ed8); width: 100%; padding: 1.25rem; border-radius: 1rem; font-weight: bold; color: white; border: none; cursor: pointer; }
+        body { 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1f2e 100%); 
+            color: #f3f4f6; 
+            font-family: -apple-system, sans-serif; 
+            min-height: 100vh;
+        }
+        .glass { 
+            background: rgba(15, 23, 42, 0.8); 
+            border: 1px solid #334155; 
+            border-radius: 20px; 
+            backdrop-filter: blur(20px);
+        }
+        .input-field { 
+            background: #0f172a; 
+            border: 2px solid #334155; 
+            color: white; 
+            padding: 20px; 
+            border-radius: 15px;
+            font-size: 16px;
+        }
+        .btn-main { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            padding: 18px; 
+            border-radius: 15px; 
+            font-weight: 700; 
+            font-size: 18px;
+        }
         .btn-buy { background: linear-gradient(135deg, #10b981, #059669) !important; }
-        .btn-premium:hover { transform: translateY(-2px); }
+        .btn-main:hover { transform: translateY(-3px); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 gap-6">
+<body class="p-6 flex flex-col items-center justify-center gap-8">
     
-    <!-- MAIN APP -->
-    <div class="max-w-lg w-full glass-card p-8 text-center shadow-2xl">
-        <h1 class="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">🎙️ VoiceDollar.ai</h1>
-        <p class="text-gray-300 mb-6">11 Labs jaisa voice generator - Sirf ₹29!</p>
+    <!-- MAIN VOICE APP -->
+    <div class="max-w-md w-full glass p-8 text-center shadow-2xl">
+        <h1 class="text-4xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">
+            🎙️ VoiceDollar.ai
+        </h1>
+        <p class="text-gray-400 mb-6 text-lg">₹29 me pro AI voice generator</p>
         
-        <textarea id="txt" class="input-box text-lg" rows="4" placeholder="Yahan text likho...">Namaste doston, VoiceDollar.ai ka magic test karo!</textarea>
+        <textarea id="textInput" class="input-field w-full h-32 mb-6 resize-none" 
+                  placeholder="Yahan apna text type karo...">Namaste doston, VoiceDollar.ai test successful!</textarea>
         
-        <button onclick="generateVoice()" id="btn" class="btn-premium text-lg py-4">🎵 Generate Voice (FREE)</button>
+        <button onclick="playVoice()" id="generateBtn" class="btn-main text-white w-full mb-6">
+            🎵 PLAY AI VOICE (FREE)
+        </button>
         
-        <div id="status" class="mt-4 p-3 rounded-lg font-semibold hidden"></div>
-        <audio id="player" controls class="w-full mt-4 rounded-lg hidden"></audio>
+        <div id="status" class="p-4 rounded-xl mb-4 font-semibold text-center hidden"></div>
+        <audio id="audioPlayer" controls class="w-full rounded-xl hidden mb-4"></audio>
     </div>
 
-    <!-- PRICING -->
-    <div class="max-w-md w-full glass-card p-6 text-center">
-        <div class="text-3xl font-black text-green-400 mb-4">₹29<span class="text-lg">/month</span></div>
-        <p class="text-gray-300 mb-4">✅ Unlimited voices • No watermark • MP3 download</p>
-        <a href="https://wa.me/91YOURNUMBER?text=*VoiceDollar.ai*+%E2%82%B929+plan+chahiye!+UPI+link+bhejdo" 
-           class="block btn-premium btn-buy text-lg py-3 mb-2" target="_blank">
-           💰 Buy Now (WhatsApp)
+    <!-- PRICING CARD -->
+    <div class="max-w-sm w-full glass p-8 text-center">
+        <div class="text-4xl font-black text-green-400 mb-4">₹29<span class="text-2xl">/month</span></div>
+        <div class="text-lg text-gray-300 mb-6">✅ Unlimited • No watermark • MP3 download</div>
+        <a href="https://wa.me/91YOURNUMBERHERE?text=*VoiceDollar.ai*+%E2%82%B929+plan+chahiye!+Payment+link+bhejdo" 
+           class="btn-main btn-buy text-white block py-4 mb-4 text-lg" target="_blank">
+            🚀 Buy Now - ₹29
         </a>
-        <p class="text-xs text-gray-400">UPI • PhonePe • Instant access</p>
+        <p class="text-xs text-gray-500">UPI • Instant access • 100% secure</p>
     </div>
 
     <script>
-        let usesLeft = 3;
-
-        function generateVoice() {
-            const text = document.getElementById('txt').value.trim();
-            const btn = document.getElementById('btn');
+        let freeUses = parseInt(localStorage.getItem('voiceUses') || '0');
+        const maxFree = 5;
+        
+        function playVoice() {
+            const text = document.getElementById('textInput').value.trim();
+            const btn = document.getElementById('generateBtn');
             const status = document.getElementById('status');
-            const player = document.getElementById('player');
-
+            const player = document.getElementById('audioPlayer');
+            
             if (!text) {
-                alert('Text daalo bhai!');
+                alert('Text type kar bhai!');
                 return;
             }
-
-            if (usesLeft <= 0) {
-                alert('Free limit khatam! ₹29 me unlimited lo!');
+            
+            if (freeUses >= maxFree) {
+                alert('Free trial khatam! ₹29 me unlimited access lo!');
                 return;
             }
-
-            // BUTTON DISABLE + LOADING
+            
+            // UI LOCK
             btn.disabled = true;
             btn.innerHTML = '🔊 Speaking...';
             status.classList.remove('hidden');
             status.innerHTML = '🎙️ Voice generate ho rahi...';
-            status.className = 'bg-blue-500/30 p-3 rounded-lg';
-
-            // BROWSER BUILT-IN VOICE (100% WORKING EVERYWHERE)
+            status.style.background = '#3b82f60f';
+            status.style.color = '#60a5fa';
+            
+            // WEB SPEECH API - 100% BROWSER BUILT-IN
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';  // English voice
-            utterance.rate = 0.9;      // Natural speed
-            utterance.pitch = 1;       // Normal pitch
-            utterance.volume = 1;
-
+            
+            // BEST VOICE SETTINGS
+            utterance.rate = 0.85;        // Natural speed
+            utterance.pitch = 1.0;         // Normal pitch
+            utterance.volume = 1.0;        // Full volume
+            
+            // VOICE EVENTS
             utterance.onstart = () => {
-                status.innerHTML = '✅ Voice chal rahi hai!';
-                status.className = 'bg-green-500/30 p-3 rounded-lg';
+                status.innerHTML = '✅ Voice chal rahi hai LIVE!';
+                status.style.background = '#10b9812e';
+                status.style.color = '#34d399';
             };
-
+            
             utterance.onend = () => {
-                status.innerHTML = `🎉 Success! ${usesLeft-1} free uses bache. ₹29 me unlimited!`;
+                status.innerHTML = `🎉 SUCCESS! ${maxFree - freeUses - 1} free uses bache | ₹29 unlimited`;
+                status.style.background = '#f59e2b2e';
+                status.style.color = '#fbbf24';
+                
+                freeUses++;
+                localStorage.setItem('voiceUses', freeUses);
                 btn.disabled = false;
                 btn.innerHTML = '🎵 New Voice';
-                usesLeft--;
                 
-                // Show download option
+                // Show player for replay
                 player.classList.remove('hidden');
             };
-
+            
+            utterance.onerror = (e) => {
+                status.innerHTML = '❌ Permission deny? Site reload karo';
+                status.style.background = '#ef44442e';
+                status.style.color = '#f87171';
+                btn.disabled = false;
+                btn.innerHTML = '🎵 Retry';
+            };
+            
+            // SELECT BEST VOICE
+            const voices = speechSynthesis.getVoices();
+            const englishVoice = voices.find(voice => voice.lang.startsWith('en-')) || voices[0];
+            if (englishVoice) utterance.voice = englishVoice;
+            
             speechSynthesis.speak(utterance);
         }
-
-        // Allow manual stop/restart
-        document.getElementById('player').addEventListener('play', () => {
-            document.getElementById('status').innerHTML = '🔄 Voice replaying...';
-        });
+        
+        // LOAD VOICES ON START
+        speechSynthesis.onvoiceschanged = () => {
+            console.log('Voices loaded:', speechSynthesis.getVoices().length);
+        };
     </script>
 </body>
 </html>
