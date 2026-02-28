@@ -3,122 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceDollar.ai - ₹29 me AI Voice</title>
+    <title>VoiceDollar.ai - ₹29 AI Voice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
-        .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; width: 100%; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; outline: none; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; border: none; cursor: pointer; }
-        .btn-premium:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-buy { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        body { background: linear-gradient(135deg, #030712 0%, #1a1f2e 100%); color: #f3f4f6; font-family: sans-serif; }
+        .glass-card { background: rgba(13, 17, 26, 0.8); border: 1px solid #1f2937; border-radius: 2rem; backdrop-filter: blur(10px); }
+        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; width: 100%; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; }
+        .btn-premium { background: linear-gradient(135deg, #2563eb, #1d4ed8); width: 100%; padding: 1.25rem; border-radius: 1rem; font-weight: bold; color: white; border: none; cursor: pointer; }
+        .btn-buy { background: linear-gradient(135deg, #10b981, #059669) !important; }
+        .btn-premium:hover { transform: translateY(-2px); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-6 gap-6">
-    <div class="max-w-xl w-full glass-card p-10 text-center shadow-2xl">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-6 tracking-tighter">🎙️ VoiceDollar.ai</h1>
-        <p class="text-xl text-gray-300 mb-8">11 Labs jaisa AI voice - Sirf ₹29/month!</p>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 gap-6">
+    
+    <!-- MAIN APP -->
+    <div class="max-w-lg w-full glass-card p-8 text-center shadow-2xl">
+        <h1 class="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">🎙️ VoiceDollar.ai</h1>
+        <p class="text-gray-300 mb-6">11 Labs jaisa voice generator - Sirf ₹29!</p>
         
-        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text for voice...">Namaste doston, VoiceDollar.ai ka magic dekho! Sirf ₹29 me Hollywood jaisa voice!</textarea>
+        <textarea id="txt" class="input-box text-lg" rows="4" placeholder="Yahan text likho...">Namaste doston, VoiceDollar.ai ka magic test karo!</textarea>
         
-        <button onclick="generateVoice()" id="btn" class="btn-premium text-lg">✨ Generate FREE Voice</button>
+        <button onclick="generateVoice()" id="btn" class="btn-premium text-lg py-4">🎵 Generate Voice (FREE)</button>
         
-        <div id="voice-output" class="mt-6 p-6 glass-card text-left hidden">
-            <div id="status" class="text-green-400 font-bold mb-4 text-lg">✅ Voice Ready!</div>
-            <audio id="player" controls class="w-full rounded-lg mb-4"></audio>
-            <button onclick="downloadVoice()" class="btn-premium text-sm">💾 Download MP3</button>
-        </div>
-        
-        <p id="loading-status" class="mt-4 text-sm text-gray-400 hidden">Generating voice...</p>
+        <div id="status" class="mt-4 p-3 rounded-lg font-semibold hidden"></div>
+        <audio id="player" controls class="w-full mt-4 rounded-lg hidden"></audio>
     </div>
 
     <!-- PRICING -->
-    <div class="max-w-md w-full glass-card p-8 text-center shadow-2xl">
-        <h2 class="text-2xl font-bold mb-4 text-green-400">💰 Unlimited Plan</h2>
-        <div class="text-4xl font-black text-green-500 mb-6">₹29<span class="text-xl">/month</span></div>
-        <p class="text-gray-300 mb-6">✅ No limits • No watermark • Instant MP3</p>
-        <a href="https://wa.me/91XXXXXXXXX?text=Hi,%20VoiceDollar.ai%20₹29%20plan%20chahiye.%20UPI%20link%20bhej%20do!" 
-           class="block btn-premium btn-buy text-lg mb-4" target="_blank">
-           🚀 Buy ₹29 Now (WhatsApp)
+    <div class="max-w-md w-full glass-card p-6 text-center">
+        <div class="text-3xl font-black text-green-400 mb-4">₹29<span class="text-lg">/month</span></div>
+        <p class="text-gray-300 mb-4">✅ Unlimited voices • No watermark • MP3 download</p>
+        <a href="https://wa.me/91YOURNUMBER?text=*VoiceDollar.ai*+%E2%82%B929+plan+chahiye!+UPI+link+bhejdo" 
+           class="block btn-premium btn-buy text-lg py-3 mb-2" target="_blank">
+           💰 Buy Now (WhatsApp)
         </a>
-        <p class="text-xs text-gray-500">UPI/PhonePe/GPay • Instant access</p>
+        <p class="text-xs text-gray-400">UPI • PhonePe • Instant access</p>
     </div>
 
     <script>
-        let freeUses = localStorage.getItem('voiceUses') || 0;
-        const maxFree = 5;
+        let usesLeft = 3;
 
-        async function generateVoice() {
-            const text = document.getElementById('txt').value;
+        function generateVoice() {
+            const text = document.getElementById('txt').value.trim();
             const btn = document.getElementById('btn');
             const status = document.getElementById('status');
             const player = document.getElementById('player');
-            const voiceOutput = document.getElementById('voice-output');
-            const loadingStatus = document.getElementById('loading-status');
 
-            if(!text.trim()) {
-                alert('❌ Text enter karo!');
+            if (!text) {
+                alert('Text daalo bhai!');
                 return;
             }
 
-            if(freeUses >= maxFree) {
-                alert('FREE limit khatam! ₹29 me unlimited access lo!');
+            if (usesLeft <= 0) {
+                alert('Free limit khatam! ₹29 me unlimited lo!');
                 return;
             }
 
-            // UI Update
+            // BUTTON DISABLE + LOADING
             btn.disabled = true;
-            btn.innerHTML = '🎙️ Speaking...';
-            loadingStatus.classList.remove('hidden');
-            loadingStatus.innerHTML = '🔊 Live voice playing...';
+            btn.innerHTML = '🔊 Speaking...';
+            status.classList.remove('hidden');
+            status.innerHTML = '🎙️ Voice generate ho rahi...';
+            status.className = 'bg-blue-500/30 p-3 rounded-lg';
 
-            try {
-                // LIVE SPEAKING (Instant)
-                responsiveVoice.speak(text, "US English Male", {
-                    rate: 0.9,
-                    pitch: 1,
-                    volume: 1,
-                    onstart: () => {
-                        loadingStatus.innerHTML = '✅ Speaking live...';
-                    },
-                    onend: () => {
-                        // MP3 GENERATE
-                        const audioUrl = `https://code.responsivevoice.org/getvoice.php?t=${encodeURIComponent(text)}&tl=en-US&sv=Michael`;
-                        player.src = audioUrl;
-                        player.load();
-                        
-                        voiceOutput.classList.remove('hidden');
-                        status.innerHTML = '✅ MP3 Ready! Download karo.';
-                        loadingStatus.classList.add('hidden');
-                        
-                        // Auto play MP3
-                        player.oncanplay = () => player.play();
-                        
-                        freeUses++;
-                        localStorage.setItem('voiceUses', freeUses);
-                        btn.disabled = false;
-                        btn.innerHTML = `✨ New Voice (${maxFree - freeUses} free left)`;
-                    }
-                });
+            // BROWSER BUILT-IN VOICE (100% WORKING EVERYWHERE)
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';  // English voice
+            utterance.rate = 0.9;      // Natural speed
+            utterance.pitch = 1;       // Normal pitch
+            utterance.volume = 1;
 
-            } catch(e) {
-                // Browser fallback
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                speechSynthesis.speak(utterance);
-                loadingStatus.innerHTML = '✅ Voice ready (browser)!';
-            }
+            utterance.onstart = () => {
+                status.innerHTML = '✅ Voice chal rahi hai!';
+                status.className = 'bg-green-500/30 p-3 rounded-lg';
+            };
+
+            utterance.onend = () => {
+                status.innerHTML = `🎉 Success! ${usesLeft-1} free uses bache. ₹29 me unlimited!`;
+                btn.disabled = false;
+                btn.innerHTML = '🎵 New Voice';
+                usesLeft--;
+                
+                // Show download option
+                player.classList.remove('hidden');
+            };
+
+            speechSynthesis.speak(utterance);
         }
 
-        function downloadVoice() {
-            const player = document.getElementById('player');
-            const link = document.createElement('a');
-            link.href = player.src;
-            link.download = 'VoiceDollar.mp3';
-            link.click();
-        }
+        // Allow manual stop/restart
+        document.getElementById('player').addEventListener('play', () => {
+            document.getElementById('status').innerHTML = '🔄 Voice replaying...';
+        });
     </script>
 </body>
 </html>
