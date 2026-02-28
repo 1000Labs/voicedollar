@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- RESPONSIVEVOICE FREE API -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <style>
         body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
         .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; }
@@ -16,56 +18,58 @@
 <body class="flex items-center justify-center min-h-screen p-6">
     <div class="max-w-xl w-full glass-card p-10 text-center shadow-2xl">
         <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text..."></textarea>
-        <button onclick="generateVoice()" id="btn" class="btn-premium">Generate Voice</button>
-        <p id="status" class="mt-4 text-sm text-gray-400"></p>
+        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text...">Namaste doston, VoiceDollar.ai ka magic dekho!</textarea>
+        <button onclick="generateVoice()" id="btn" class="btn-premium">🎙️ Generate Voice (FREE)</button>
+        <p id="status" class="mt-4 text-sm text-gray-400">Click generate - Instant voice!</p>
         <audio id="player" controls class="hidden w-full mt-10"></audio>
+        
+        <!-- ₹29 PAYMENT BUTTON -->
+        <div class="mt-8 p-6 glass-card text-left">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">💰 Unlimited Plan</h2>
+            <div class="text-3xl font-black text-green-500 mb-2">₹29/month</div>
+            <a href="https://wa.me/91XXXXXXXXX?text=Hi,%20VoiceDollar.ai%20₹29%20plan%20chahiye.%20UPI%20link%20bhej%20do!" 
+               class="block btn-premium mb-2" target="_blank" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+               🚀 Buy ₹29 Now (WhatsApp)
+            </a>
+            <p class="text-xs text-gray-500">✅ UPI accepted • Instant access • No limits</p>
+        </div>
     </div>
 
     <script>
         async function generateVoice() {
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
-            const player = document.getElementById('player');
             const status = document.getElementById('status');
 
-            if(!text) return;
-            btn.disabled = true; btn.innerHTML = "Processing...";
-            status.innerHTML = "AI is waking up... Please wait 20-30 seconds.";
+            if(!text) {
+                status.innerHTML = "❌ Text enter karo!";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = "🎙️ Speaking...";
+            status.innerHTML = "Voice generating...";
 
             try {
-                const response = await fetch("/api/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text })
+                // METHOD 1: ResponsiveVoice (INSTANT 100% WORKING)
+                responsiveVoice.speak(text, "US English Male", {
+                    rate: 0.9,
+                    pitch: 1,
+                    onstart: () => status.innerHTML = "✅ Speaking now!",
+                    onend: () => {
+                        status.innerHTML = "🎉 Success! ₹29 me unlimited access lo!";
+                        btn.disabled = false;
+                        btn.innerHTML = "🎙️ New Voice";
+                    }
                 });
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    if (err.error === "Model Loading") {
-                        status.innerHTML = "Model is still loading... Try again in 5 seconds.";
-                    } else {
-                        status.innerHTML = "Error: Key/Token issue.";
-                    }
-                    throw new Error("Failed");
-                }
-
-                const blob = await response.blob();
-                if (blob.size < 1000) { // Check if audio is too small (empty)
-                    status.innerHTML = "Received empty audio. Model is busy. Retry now.";
-                    return;
-                }
-
-                const url = URL.createObjectURL(blob);
-                player.src = url;
-                player.classList.remove('hidden');
-                status.innerHTML = "Success! Playing now.";
-                player.play();
-
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.disabled = false; btn.innerHTML = "Generate Voice";
+            } catch(e) {
+                // METHOD 2: Browser fallback
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+                status.innerHTML = "✅ Voice ready!";
             }
         }
     </script>
