@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoiceDollar.ai</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        body { background-color: #030712; color: #f3f4f6; font-family: ui-sans-serif, system-ui; }
         .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; backdrop-filter: blur(10px); }
         .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; outline: none; transition: 0.3s; }
         .input-box:focus { border-color: #2563eb; }
@@ -29,33 +28,27 @@
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
             const player = document.getElementById('player');
-            
             if(!text) return;
-            
-            btn.innerHTML = "Processing...";
-            btn.disabled = true;
+
+            btn.innerHTML = "Generating..."; btn.disabled = true;
 
             try {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: text }),
+                    body: JSON.stringify({ text: text }),
                 });
 
                 if (!response.ok) throw new Error();
 
                 const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                
-                player.src = url;
+                player.src = URL.createObjectURL(blob);
                 player.classList.remove('hidden');
                 player.play();
-                
             } catch (err) {
-                // Silently fails as per your command
+                console.error("Audio failed");
             } finally {
-                btn.innerHTML = "Generate Voice";
-                btn.disabled = false;
+                btn.innerHTML = "Generate Voice"; btn.disabled = false;
             }
         }
     </script>
