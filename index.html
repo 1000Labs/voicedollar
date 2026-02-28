@@ -14,44 +14,74 @@
 </head>
 <body class="p-5 flex items-center justify-center min-h-screen">
     <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar<span class="text-white">.ai</span></h1>
+        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">
+            VoiceDollar<span class="text-white">.ai</span>
+        </h1>
         
-        <textarea id="textInput" class="w-full p-5 input-area rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6" rows="6" placeholder="Enter text here..."></textarea>
+        <textarea 
+            id="textInput" 
+            class="w-full p-5 input-area rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6" 
+            rows="6" 
+            placeholder="Enter text here..."
+        ></textarea>
             
-        <button onclick="generateVoice()" id="btn" class="w-full btn-primary p-5 rounded-xl font-bold transition-all active:scale-95 shadow-lg">
+        <button 
+            type="button"
+            onclick="generateVoice()" 
+            id="btn" 
+            class="w-full btn-primary p-5 rounded-xl font-bold transition-all active:scale-95 shadow-lg"
+        >
             Generate Voice
         </button>
 
-        <audio id="audioPlayer" controls class="hidden w-full mt-8 rounded-full border border-slate-700 bg-slate-800"></audio>
+        <audio 
+            id="audioPlayer" 
+            controls 
+            class="hidden w-full mt-8 rounded-full border border-slate-700 bg-slate-800"
+        ></audio>
+
+        <p id="errorMsg" class="text-red-500 mt-4 hidden">Something went wrong. Please try again.</p>
     </div>
 
     <script>
         async function generateVoice() {
-            const text = document.getElementById('textInput').value;
-            if(!text) return;
-            
+            const textArea = document.getElementById('textInput');
+            const text = textArea.value.trim();
+            if (!text) return;
+
             const btn = document.getElementById('btn');
             const player = document.getElementById('audioPlayer');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Reset states
+            errorMsg.classList.add('hidden');
+            player.pause();
+            player.src = "";
+            player.classList.add('hidden');
 
             btn.disabled = true;
             btn.innerHTML = "Processing...";
 
             try {
-                // TOKEN KI JAGAH AB HUM VERCEL PROXY USE KAR RAHE HAIN
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: text }),
+                    body: JSON.stringify({ text: text }),
                 });
 
-                if(!response.ok) throw new Error();
+                if (!response.ok) {
+                    throw new Error("Server error");
+                }
 
-                const result = await response.blob();
-                player.src = URL.createObjectURL(result);
+                const blob = await response.blob();
+                const audioURL = URL.createObjectURL(blob);
+
+                player.src = audioURL;
                 player.classList.remove('hidden');
-                player.play();
+                await player.play();
+
             } catch (err) {
-                // No extra text here
+                errorMsg.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = "Generate Voice";
