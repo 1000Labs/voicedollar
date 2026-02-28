@@ -6,25 +6,23 @@
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
-        .glass { background: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; }
-        .btn-gradient { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+        body { background-color: #030712; color: #f3f4f6; }
+        .glass-card { background-color: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
+        .input-area { background-color: #1a1f2e; border: 1px solid #374151; color: white; }
+        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
     </style>
 </head>
 <body class="p-5 flex items-center justify-center min-h-screen">
-    <div class="max-w-xl w-full glass p-10 shadow-2xl">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-blue-500 tracking-tighter">VoiceDollar<span class="text-white">.ai</span></h1>
-        </div>
+    <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
+        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar<span class="text-white">.ai</span></h1>
         
-        <textarea id="textInput" class="w-full p-5 input-box rounded-xl focus:outline-none focus:border-blue-500 mb-6" rows="6" placeholder="Enter text..."></textarea>
+        <textarea id="textInput" class="w-full p-5 input-area rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6" rows="6" placeholder="Enter text here..."></textarea>
             
-        <button onclick="generateVoice()" id="btn" class="w-full btn-gradient p-5 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
+        <button onclick="generateVoice()" id="btn" class="w-full btn-primary p-5 rounded-xl font-bold transition-all active:scale-95 shadow-lg">
             Generate Voice
         </button>
 
-        <audio id="audioPlayer" controls class="hidden w-full mt-8 bg-slate-800 rounded-full border border-slate-700"></audio>
+        <audio id="audioPlayer" controls class="hidden w-full mt-8 rounded-full border border-slate-700 bg-slate-800"></audio>
     </div>
 
     <script>
@@ -39,18 +37,21 @@
             btn.innerHTML = "Processing...";
 
             try {
+                // TOKEN KI JAGAH AB HUM VERCEL PROXY USE KAR RAHE HAIN
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inputs: text }),
                 });
 
+                if(!response.ok) throw new Error();
+
                 const result = await response.blob();
                 player.src = URL.createObjectURL(result);
                 player.classList.remove('hidden');
                 player.play();
             } catch (err) {
-                console.log("Error");
+                // No extra text here
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = "Generate Voice";
