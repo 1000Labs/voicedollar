@@ -9,34 +9,29 @@
         body { background-color: #030712; color: #f3f4f6; font-family: ui-sans-serif, system-ui; }
         .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; backdrop-filter: blur(10px); }
         .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; outline: none; transition: 0.3s; width: 100%; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; font-size: 1.125rem; color: white; transition: 0.2s; }
-        .btn-premium:disabled { background: #374151; cursor: not-allowed; opacity: 0.7; }
+        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; cursor: pointer; }
+        .btn-premium:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
     <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
         <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        
-        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Yahan text likho..."></textarea>
-        
-        <button onclick="generateVoice()" id="btn" class="btn-premium">Generate Voice</button>
-        
+        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text here..."></textarea>
+        <button onclick="generate()" id="btn" class="btn-premium">Generate Voice</button>
         <div id="status" class="mt-4 text-sm text-gray-400"></div>
         <audio id="player" controls class="hidden w-full mt-10"></audio>
     </div>
 
     <script>
-        async function generateVoice() {
+        async function generate() {
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
             const player = document.getElementById('player');
             const status = document.getElementById('status');
 
             if(!text) return;
-
-            btn.innerHTML = "Processing...";
-            btn.disabled = true;
-            status.innerHTML = "AI Model ko call kiya ja raha hai...";
+            btn.innerHTML = "Generating..."; btn.disabled = true;
+            status.innerHTML = "AI Model is waking up... Please wait.";
 
             try {
                 const response = await fetch("/api/generate", {
@@ -45,26 +40,25 @@
                     body: JSON.stringify({ text: text }),
                 });
 
-                if (response.status === 500 || response.status === 503) {
-                    status.innerHTML = "Model load ho raha hai, 20 second baad phir try karein.";
-                    throw new Error("Loading");
+                if (response.status === 503 || response.status === 500) {
+                    status.innerHTML = "Model is still loading. Try again in 10 seconds.";
+                    return;
                 }
 
-                if (!response.ok) throw new Error("Failed");
-
                 const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
+                // Browser fix: Force audio type
+                const audioBlob = new Blob([blob], { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(audioBlob);
+                
                 player.src = url;
                 player.classList.remove('hidden');
+                status.innerHTML = "Success!";
                 player.play();
-                status.innerHTML = "Success! Audio ready hai.";
 
             } catch (err) {
-                console.error(err);
-                if(err.message !== "Loading") status.innerHTML = "Error: Key check karein ya page refresh karein.";
+                status.innerHTML = "Connection Error. Check your Token.";
             } finally {
-                btn.innerHTML = "Generate Voice";
-                btn.disabled = false;
+                btn.innerHTML = "Generate Voice"; btn.disabled = false;
             }
         }
     </script>
