@@ -3,74 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceDollar.ai</title>
+    <title>VoiceDollar.ai - ₹29 me AI Voice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- RESPONSIVEVOICE FREE API -->
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <style>
         body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
         .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; }
         .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; width: 100%; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; outline: none; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; border: none; cursor: pointer; }
         .btn-premium:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-buy { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body class="flex flex-col items-center justify-center min-h-screen p-6 gap-6">
     <div class="max-w-xl w-full glass-card p-10 text-center shadow-2xl">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text...">Namaste doston, VoiceDollar.ai ka magic dekho!</textarea>
-        <button onclick="generateVoice()" id="btn" class="btn-premium">🎙️ Generate Voice (FREE)</button>
-        <p id="status" class="mt-4 text-sm text-gray-400">Click generate - Instant voice!</p>
-        <audio id="player" controls class="hidden w-full mt-10"></audio>
+        <h1 class="text-4xl font-extrabold text-blue-500 mb-6 tracking-tighter">🎙️ VoiceDollar.ai</h1>
+        <p class="text-xl text-gray-300 mb-8">11 Labs jaisa AI voice - Sirf ₹29/month!</p>
         
-        <!-- ₹29 PAYMENT BUTTON -->
-        <div class="mt-8 p-6 glass-card text-left">
-            <h2 class="text-2xl font-bold mb-4 text-green-400">💰 Unlimited Plan</h2>
-            <div class="text-3xl font-black text-green-500 mb-2">₹29/month</div>
-            <a href="https://wa.me/91XXXXXXXXX?text=Hi,%20VoiceDollar.ai%20₹29%20plan%20chahiye.%20UPI%20link%20bhej%20do!" 
-               class="block btn-premium mb-2" target="_blank" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-               🚀 Buy ₹29 Now (WhatsApp)
-            </a>
-            <p class="text-xs text-gray-500">✅ UPI accepted • Instant access • No limits</p>
+        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text for voice...">Namaste doston, VoiceDollar.ai ka magic dekho! Sirf ₹29 me Hollywood jaisa voice!</textarea>
+        
+        <button onclick="generateVoice()" id="btn" class="btn-premium text-lg">✨ Generate FREE Voice</button>
+        
+        <div id="voice-output" class="mt-6 p-6 glass-card text-left hidden">
+            <div id="status" class="text-green-400 font-bold mb-4 text-lg">✅ Voice Ready!</div>
+            <audio id="player" controls class="w-full rounded-lg mb-4"></audio>
+            <button onclick="downloadVoice()" class="btn-premium text-sm">💾 Download MP3</button>
         </div>
+        
+        <p id="loading-status" class="mt-4 text-sm text-gray-400 hidden">Generating voice...</p>
+    </div>
+
+    <!-- PRICING -->
+    <div class="max-w-md w-full glass-card p-8 text-center shadow-2xl">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">💰 Unlimited Plan</h2>
+        <div class="text-4xl font-black text-green-500 mb-6">₹29<span class="text-xl">/month</span></div>
+        <p class="text-gray-300 mb-6">✅ No limits • No watermark • Instant MP3</p>
+        <a href="https://wa.me/91XXXXXXXXX?text=Hi,%20VoiceDollar.ai%20₹29%20plan%20chahiye.%20UPI%20link%20bhej%20do!" 
+           class="block btn-premium btn-buy text-lg mb-4" target="_blank">
+           🚀 Buy ₹29 Now (WhatsApp)
+        </a>
+        <p class="text-xs text-gray-500">UPI/PhonePe/GPay • Instant access</p>
     </div>
 
     <script>
+        let freeUses = localStorage.getItem('voiceUses') || 0;
+        const maxFree = 5;
+
         async function generateVoice() {
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
             const status = document.getElementById('status');
+            const player = document.getElementById('player');
+            const voiceOutput = document.getElementById('voice-output');
+            const loadingStatus = document.getElementById('loading-status');
 
-            if(!text) {
-                status.innerHTML = "❌ Text enter karo!";
+            if(!text.trim()) {
+                alert('❌ Text enter karo!');
                 return;
             }
 
+            if(freeUses >= maxFree) {
+                alert('FREE limit khatam! ₹29 me unlimited access lo!');
+                return;
+            }
+
+            // UI Update
             btn.disabled = true;
-            btn.innerHTML = "🎙️ Speaking...";
-            status.innerHTML = "Voice generating...";
+            btn.innerHTML = '🎙️ Speaking...';
+            loadingStatus.classList.remove('hidden');
+            loadingStatus.innerHTML = '🔊 Live voice playing...';
 
             try {
-                // METHOD 1: ResponsiveVoice (INSTANT 100% WORKING)
+                // LIVE SPEAKING (Instant)
                 responsiveVoice.speak(text, "US English Male", {
                     rate: 0.9,
                     pitch: 1,
-                    onstart: () => status.innerHTML = "✅ Speaking now!",
+                    volume: 1,
+                    onstart: () => {
+                        loadingStatus.innerHTML = '✅ Speaking live...';
+                    },
                     onend: () => {
-                        status.innerHTML = "🎉 Success! ₹29 me unlimited access lo!";
+                        // MP3 GENERATE
+                        const audioUrl = `https://code.responsivevoice.org/getvoice.php?t=${encodeURIComponent(text)}&tl=en-US&sv=Michael`;
+                        player.src = audioUrl;
+                        player.load();
+                        
+                        voiceOutput.classList.remove('hidden');
+                        status.innerHTML = '✅ MP3 Ready! Download karo.';
+                        loadingStatus.classList.add('hidden');
+                        
+                        // Auto play MP3
+                        player.oncanplay = () => player.play();
+                        
+                        freeUses++;
+                        localStorage.setItem('voiceUses', freeUses);
                         btn.disabled = false;
-                        btn.innerHTML = "🎙️ New Voice";
+                        btn.innerHTML = `✨ New Voice (${maxFree - freeUses} free left)`;
                     }
                 });
 
             } catch(e) {
-                // METHOD 2: Browser fallback
+                // Browser fallback
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.9;
                 speechSynthesis.speak(utterance);
-                status.innerHTML = "✅ Voice ready!";
+                loadingStatus.innerHTML = '✅ Voice ready (browser)!';
             }
+        }
+
+        function downloadVoice() {
+            const player = document.getElementById('player');
+            const link = document.createElement('a');
+            link.href = player.src;
+            link.download = 'VoiceDollar.mp3';
+            link.click();
         }
     </script>
 </body>
