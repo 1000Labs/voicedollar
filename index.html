@@ -6,59 +6,66 @@
     <title>VoiceDollar.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: ui-sans-serif, system-ui; }
-        .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; backdrop-filter: blur(10px); }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; outline: none; transition: 0.3s; width: 100%; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; cursor: pointer; }
+        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
+        .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; }
+        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; width: 100%; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; outline: none; }
+        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); width: 100%; padding: 1.25rem; border-radius: 0.75rem; font-weight: bold; color: white; transition: 0.2s; }
         .btn-premium:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
-    <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
+    <div class="max-w-xl w-full glass-card p-10 text-center shadow-2xl">
         <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text here..."></textarea>
-        <button onclick="generate()" id="btn" class="btn-premium">Generate Voice</button>
-        <div id="status" class="mt-4 text-sm text-gray-400"></div>
+        <textarea id="txt" class="input-box text-lg" rows="5" placeholder="Enter text..."></textarea>
+        <button onclick="generateVoice()" id="btn" class="btn-premium">Generate Voice</button>
+        <p id="status" class="mt-4 text-sm text-gray-400"></p>
         <audio id="player" controls class="hidden w-full mt-10"></audio>
     </div>
 
     <script>
-        async function generate() {
+        async function generateVoice() {
             const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
             const player = document.getElementById('player');
             const status = document.getElementById('status');
 
             if(!text) return;
-            btn.innerHTML = "Generating..."; btn.disabled = true;
-            status.innerHTML = "AI Model is waking up... Please wait.";
+            btn.disabled = true; btn.innerHTML = "Processing...";
+            status.innerHTML = "AI is waking up... Please wait 20-30 seconds.";
 
             try {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: text }),
+                    body: JSON.stringify({ text })
                 });
 
-                if (response.status === 503 || response.status === 500) {
-                    status.innerHTML = "Model is still loading. Try again in 10 seconds.";
-                    return;
+                if (!response.ok) {
+                    const err = await response.json();
+                    if (err.error === "Model Loading") {
+                        status.innerHTML = "Model is still loading... Try again in 5 seconds.";
+                    } else {
+                        status.innerHTML = "Error: Key/Token issue.";
+                    }
+                    throw new Error("Failed");
                 }
 
                 const blob = await response.blob();
-                // Browser fix: Force audio type
-                const audioBlob = new Blob([blob], { type: 'audio/mpeg' });
-                const url = URL.createObjectURL(audioBlob);
-                
+                if (blob.size < 1000) { // Check if audio is too small (empty)
+                    status.innerHTML = "Received empty audio. Model is busy. Retry now.";
+                    return;
+                }
+
+                const url = URL.createObjectURL(blob);
                 player.src = url;
                 player.classList.remove('hidden');
-                status.innerHTML = "Success!";
+                status.innerHTML = "Success! Playing now.";
                 player.play();
 
-            } catch (err) {
-                status.innerHTML = "Connection Error. Check your Token.";
+            } catch (e) {
+                console.error(e);
             } finally {
-                btn.innerHTML = "Generate Voice"; btn.disabled = false;
+                btn.disabled = false; btn.innerHTML = "Generate Voice";
             }
         }
     </script>
