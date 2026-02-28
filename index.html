@@ -1,56 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceDollar.ai</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: ui-sans-serif, system-ui; }
-        .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; backdrop-filter: blur(10px); }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; outline: none; transition: 0.3s; }
-        .input-box:focus { border-color: #2563eb; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: 0.2s; }
-        .btn-premium:hover { opacity: 0.9; transform: scale(0.99); }
-        .btn-premium:disabled { background: #374151; cursor: not-allowed; }
-    </style>
-</head>
-<body class="flex items-center justify-center min-h-screen p-6">
-    <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
-        <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        <textarea id="txt" class="w-full p-6 input-box rounded-xl mb-6 text-lg" rows="5" placeholder="Enter text to generate voice..."></textarea>
-        <button onclick="generate()" id="btn" class="w-full btn-premium p-5 rounded-xl font-bold text-lg">Generate Voice</button>
-        <audio id="player" controls class="hidden w-full mt-10"></audio>
-    </div>
+<script>
+    async function generate() {
+        const text = document.getElementById('txt').value;
+        const btn = document.getElementById('btn');
+        const player = document.getElementById('player');
+        if(!text) return;
 
-    <script>
-        async function generate() {
-            const text = document.getElementById('txt').value;
-            const btn = document.getElementById('btn');
-            const player = document.getElementById('player');
-            if(!text) return;
+        btn.innerHTML = "Generating..."; btn.disabled = true;
 
-            btn.innerHTML = "Generating..."; btn.disabled = true;
+        try {
+            const response = await fetch("/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text }),
+            });
 
-            try {
-                const response = await fetch("/api/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: text }),
-                });
+            if (!response.ok) throw new Error();
 
-                if (!response.ok) throw new Error();
-
-                const blob = await response.blob();
-                player.src = URL.createObjectURL(blob);
-                player.classList.remove('hidden');
-                player.play();
-            } catch (err) {
-                console.error("Audio failed");
-            } finally {
-                btn.innerHTML = "Generate Voice"; btn.disabled = false;
-            }
+            const blob = await response.blob();
+            player.src = URL.createObjectURL(blob);
+            player.classList.remove('hidden');
+            player.play();
+        } catch (err) {
+            console.log("Error occurred"); // Sirf console mein dikhega
+        } finally {
+            btn.innerHTML = "Generate Voice"; btn.disabled = false;
         }
-    </script>
-</body>
-</html>
+    }
+</script>
