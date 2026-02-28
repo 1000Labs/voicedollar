@@ -4,6 +4,16 @@
       "source": "/api/generate",
       "destination": "https://api-inference.huggingface.co/models/facebook/mms-tts-eng"
     }
+  ],
+  "headers": [
+    {
+      "source": "/api/generate",
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer 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"
+        }
+      ]
+    }
   ]
 }
-
