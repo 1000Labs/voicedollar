@@ -4,46 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoiceDollar.ai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #030712; color: #f3f4f6; font-family: sans-serif; }
-        .glass-card { background: #0d111a; border: 1px solid #1f2937; border-radius: 1.5rem; }
-        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+        body { background-color: #030712; color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(13, 17, 26, 0.7); border: 1px solid #1f2937; border-radius: 1.5rem; backdrop-filter: blur(10px); }
+        .input-box { background: #1a1f2e; border: 1px solid #374151; color: white; outline: none; transition: 0.3s; }
+        .input-box:focus { border-color: #2563eb; }
+        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: 0.2s; }
+        .btn-premium:hover { opacity: 0.9; transform: scale(0.99); }
     </style>
 </head>
-<body class="p-5 flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-6">
     <div class="max-w-xl w-full glass-card p-10 shadow-2xl text-center">
         <h1 class="text-4xl font-extrabold text-blue-500 mb-10 tracking-tighter">VoiceDollar.ai</h1>
-        <textarea id="textInput" class="w-full p-5 input-box rounded-xl focus:outline-none mb-6" rows="6" placeholder="Yahan text likho..."></textarea>
-        <button onclick="generateVoice()" id="btn" class="w-full btn-premium p-5 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">Generate Voice</button>
-        <audio id="audioPlayer" controls class="hidden w-full mt-8 rounded-full border border-slate-700"></audio>
+        <textarea id="txt" class="w-full p-6 input-box rounded-xl mb-6 text-lg" rows="5" placeholder="Enter text to generate voice..."></textarea>
+        <button onclick="generate()" id="btn" class="w-full btn-premium p-5 rounded-xl font-bold text-lg">Generate Voice</button>
+        <audio id="player" controls class="hidden w-full mt-10"></audio>
     </div>
+
     <script>
-        async function generateVoice() {
-            const text = document.getElementById('textInput').value;
-            if(!text) return;
+        async function generate() {
+            const text = document.getElementById('txt').value;
             const btn = document.getElementById('btn');
-            const player = document.getElementById('audioPlayer');
-            btn.disabled = true;
-            btn.innerHTML = "Processing...";
+            const player = document.getElementById('player');
+            if(!text) return;
+            btn.innerHTML = "Synthesizing..."; btn.disabled = true;
             try {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ inputs: text }),
                 });
-                if(!response.ok) throw new Error("Server Error");
-                const result = await response.blob();
-                player.src = URL.createObjectURL(result);
+                if (!response.ok) throw new Error();
+                const blob = await response.blob();
+                player.src = URL.createObjectURL(blob);
                 player.classList.remove('hidden');
                 player.play();
-            } catch (err) {
-                alert("Model load ho raha hai, 10 second baad dobara try karein.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "Generate Voice";
-            }
+            } catch (err) { }
+            finally { btn.innerHTML = "Generate Voice"; btn.disabled = false; }
         }
     </script>
 </body>
